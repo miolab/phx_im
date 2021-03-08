@@ -1,10 +1,19 @@
 FROM elixir:1.11.3-slim
 
+ENV MIX_HOME=/root/.mix
 # ENV MIX_HOME=/root/.mix \
 #   MIX_ENV=prod \
 #   SECRET_KEY_BASE=${SECRET_KEY_BASE}
 
 # COPY . /usr/src/app
+COPY ./assets /usr/src/app/assets
+COPY ./config /usr/src/app/config
+COPY ./lib /usr/src/app/lib
+COPY ./priv /usr/src/app/priv
+COPY ./test /usr/src/app/test
+COPY ./.formatter.exs /usr/src/app/.formatter.exs
+COPY ./mix.exs /usr/src/app/mix.exs
+COPY ./mix.lock /usr/src/app/mix.lock
 
 WORKDIR /usr/src/app
 
