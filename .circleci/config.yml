@@ -1,0 +1,79 @@
+version: 2.1
+
+executors:
+  machine-executor:
+    machine:
+      image: ubuntu-1604:202010-01
+
+# orbs:
+#   heroku: circleci/heroku@1.2.5
+
+workflows:
+  version: 2
+  build-deploy:
+    jobs:
+      - build
+      # - deploy:
+      #     requires:
+      #       - build
+      #     filters:
+      #       branches:
+      #         only: main
+
+jobs:
+  build:
+    executor:
+      name: machine-executor
+    steps:
+      - checkout
+      - run:
+          name: Build Docker containers
+          command: |
+            set -x
+            docker-compose build
+            docker-compose run --rm app bash -c "mix --version && mix archive"
+            docker-compose run --rm app bash -c "node --version && npm --version"
+      - run:
+          name: Mix deps.get & compile
+          command: |
+            set -x
+            docker-compose run --rm app bash -c "ls && mix deps.get && mix deps.compile"
+      - run:
+          name: Npm install in assets directory
+          command: |
+            set -x
+            docker-compose run --rm app bash -c "cd assets && ls && npm install && node node_modules/webpack/bin/webpack.js --mode development"
+      - run:
+          name: Mix phx.digest
+          command: |
+            set -x
+            docker-compose run --rm app mix phx.digest
+      - run:
+          name: Run Docker containers
+          command: |
+            set -x
+            docker-compose up -d
+            sleep 5
+            docker ps -f status=running
+            docker-compose logs
+      - run:
+          name: Mix format
+          command: |
+            set -x
+            docker-compose exec app bash -c "mix format --check-formatted"
+      - run:
+          name: Mix test
+          command: |
+            set -x
+            docker-compose exec app bash -c "MIX_ENV=test mix test"
+      - run:
+          name: Check directories and existed mix dependencies
+          command: |
+            set -x
+            pwd && ls -a && ls -a app && ls app/deps
+            docker-compose exec app bash -c "mix deps"
+      - run:
+          name: Finish build
+          command: |
+            set -x
+            echo "Finish build"

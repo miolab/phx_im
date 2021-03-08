@@ -1,0 +1,24 @@
+# Phoenix
+# https://github.com/phoenixframework/phoenix/blob/master/.gitignore
+*/_build
+*/deps
+*/doc
+*/tmp
+*/node_modules
+
+*/assets/node_modules
+
+erl_crash.dump
+
+# Elixir
+# https://github.com/github/gitignore/blob/master/Elixir.gitignore
+/cover
+/.fetch
+*.ez
+*.beam
+/app/config/prod.secret.exs
+
+.elixir_ls/
+
+# User setting
+.env
